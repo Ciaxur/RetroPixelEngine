@@ -1,0 +1,7 @@
+# User-Specific Configs
+.vscode
+.idea
+
+# CMake
+build
+.vs
