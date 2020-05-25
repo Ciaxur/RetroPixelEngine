@@ -2,7 +2,7 @@
 A basic Game Engine, or Visual Engine, that's main purpose is to ease development on Retro-Type Pixle Manipulation with a small resolution. The Engine has multiple Virtual Methods to help obstract the underlying Engine such as Running, FPS, Initialization, and Clean up. The Engine is meant to be Extended through Inheritance so be creative and have fun! 😊
 
 ## Build & Run 🔨
-CMake takes care of the heavy Building.
+CMake takes care of the heavy Building. All that is required is to modify [src/main.cc](src/main.cc) or remove it, as you wish. Make sure to include all your files in the [CMakeLists](CMakeLists.txt) if any additional source files are included. Have fun!!
 
 ```bash
 git submodule update --init --recursive     # Update all Submodules

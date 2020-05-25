@@ -104,10 +104,39 @@ void RetroPixelEngine::Preload() {
     this->InitRender();
 }
 
-// TODO: FixedUpdate
-void RetroPixelEngine::fixedUpdate(double deltaTime) {}
+void RetroPixelEngine::fixedUpdate(const double deltaTime) {}
 
+void RetroPixelEngine::setFixedTimeUpdate(uint64_t deltaTime) {
+    if (deltaTime > 0)
+        this->fixedTimeUpdate = deltaTime; // Assume user knows what their doing
+}
 
+/**
+ * Running Fixed Update in a Thread until parent's isLoop is
+ *  false
+ * 
+ * @param deltaTime - Time in Milliseconds to run fixedUpdate
+ * @param parent - Pointer to the RetroPixelEngine Parent Object
+ */
+void RetroPixelEngine::runFixedUpdate(uint64_t deltaTime, RetroPixelEngine *parent) {
+    // Keep track of Variables
+    double startTime = SDL_GetTicks() / 1000.0f;    // Start Time of Call (Obtain Delta Time)
+    double endTime = startTime;                     // End Time of Call
+    
+    while(parent->isLoop) {
+        // Store Current Time
+        startTime = SDL_GetTicks() / 1000.0f;   // Store Current Time
+        
+        // Run Virtual Function
+        parent->fixedUpdate(startTime - endTime);   // Evaluate and send Send the deltaTime since last Call
+
+        // Update time
+        endTime = startTime;                    // Store the Current Time
+
+        // Run Delay
+        std::this_thread::sleep_for(std::chrono::milliseconds(deltaTime));
+    }
+}
 
 /**
  ***********************************************************
@@ -215,10 +244,13 @@ int RetroPixelEngine::run() {
     /* Run Pre-Start Function */
     Preload();
 
+    /* Run fixedUpdate in a Thread */
+    std::thread fixedUpdateThread(runFixedUpdate, this->fixedTimeUpdate, this);
 
     /* Keep Window open until Quit - Hanlde Polling in Thread */
     SDL_Event windowEvent;
     std::thread event_thread(handleEventPolling, &windowEvent, this);
+
 
     /* Start Looping */
     isLoop = true;
@@ -239,8 +271,9 @@ int RetroPixelEngine::run() {
         overallFrameCount++;
     }
 
-    // Wait till Event Handler Thread Quits
+    // Wait till Threads Quits
     event_thread.join();
+    fixedUpdateThread.join();
 
     // No Issues
     return 0;

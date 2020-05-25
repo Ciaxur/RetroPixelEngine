@@ -13,9 +13,10 @@
 
 class RetroPixelEngine {
   private:      // Private Untouchable Variables
-    bool    isLoop;                 // Loop State of Engine (Shuts off if False)
-    int     WIDTH_pixel;            // Pixel Width of Texture (Will be Stretched to fit Window Width)
-    int     HEIGHT_pixel;           // Pixel Height of Texture (Will be Stretched to fit Window Height)
+    bool    isLoop;                     // Loop State of Engine (Shuts off if False)
+    int     WIDTH_pixel;                // Pixel Width of Texture (Will be Stretched to fit Window Width)
+    int     HEIGHT_pixel;               // Pixel Height of Texture (Will be Stretched to fit Window Height)
+    uint64_t  fixedTimeUpdate = 200;    // Milliseconds that the fixedUpdate method will be called (Default 200ms)
 
   protected:    // Protected Variables | GL Window Data
     const u_int8_t  RES_SCALE;              // Scaled Multiplier of Pixel Dimensions
@@ -38,6 +39,7 @@ class RetroPixelEngine {
 
   private:    // Private Static Methods (Threads)
     static void handleEventPolling(SDL_Event *windowEvent, RetroPixelEngine *parent);
+    static void runFixedUpdate(uint64_t deltaTime, RetroPixelEngine *parent);
 
   protected:  // Shared Methods
     /**
@@ -59,12 +61,27 @@ class RetroPixelEngine {
      */
     virtual void Preload();
 
-    /* TODO: Fixed Update
+    /* 
      * Fixed Interval Update
-     * Used for Physics Sync
-     *  @param deltaTime - Timestep
+     *  Update is called in a Thread at a given Fixed Time
+     *   defined by fixedTimeUpdate. The thread calls this function
+     *   every "fixedTimeUpdate" milliseconds
+     * 
+     * @param deltaTime - The change in Time it took from last 
+     *  time fixedUpate was called
      */
-    virtual void fixedUpdate(double deltaTime);
+    virtual void fixedUpdate(const double deltaTime);
+
+    /**
+     * Sets the time in milliseconds to run the "fixedUpdate" method
+     *  changing from it's default value of 200ms
+     * Running this method takes no effect unless it was run prior
+     *  to the "run" method
+     * 
+     * @param deltaTime - Time in Milliseconds that the fixedUpdate method will
+     *  be ran
+     */
+    void setFixedTimeUpdate(uint64_t deltaTime);
 
 
 
